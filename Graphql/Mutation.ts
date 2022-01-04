@@ -6,8 +6,8 @@ export const CREATE_USER = gql`
     $lastName: String!
     $idNumber: String!
     $phoneNumber: String!
-    $bottomMouthPositionX: Float!
-    $bottomMouthPositionY: Float!
+    $leftEyePositionX: Float!
+    $leftEyePositionY: Float!
     $boundsX: Float!
     $boundsY: Float!
     $faceHeight: Float!
@@ -19,8 +19,8 @@ export const CREATE_USER = gql`
         lastName: $lastName
         idNumber: $idNumber
         phoneNumber: $phoneNumber
-        bottomMouthPositionX: $bottomMouthPositionX
-        bottomMouthPositionY: $bottomMouthPositionY
+        leftEyePositionX: $leftEyePositionX
+        leftEyePositionY: $leftEyePositionY
         boundsX: $boundsX
         boundsY: $boundsY
         faceHeight: $faceHeight
@@ -31,8 +31,8 @@ export const CREATE_USER = gql`
       lastName
       idNumber
       phoneNumber
-      bottomMouthPositionX
-      bottomMouthPositionY
+      leftEyePositionX
+      leftEyePositionY
       boundsX
       boundsY
       faceHeight
@@ -41,15 +41,18 @@ export const CREATE_USER = gql`
   }
 `;
 
-export const SIGN_UP = gql`
-  mutation login($faceHeight: Float!, $faceWidth: Float!) {
-    login(faceHeight: $faceHeight, faceWidth: $faceWidth) {
+export const SIGN_IN = gql`
+  mutation login($leftEyePositionX: Float!, $leftEyePositionY: Float!) {
+    login(
+      leftEyePositionX: $leftEyePositionX
+      leftEyePositionY: $leftEyePositionY
+    ) {
       firstName
       lastName
       idNumber
       phoneNumber
-      bottomMouthPositionX
-      bottomMouthPositionY
+      leftEyePositionX
+      leftEyePositionY
       boundsX
       boundsY
       faceHeight
@@ -60,21 +63,23 @@ export const SIGN_UP = gql`
 
 export const UPDATE_USER = gql`
   mutation updateUser(
+    $idNumber: String!
     $firstName: String!
     $lastName: String!
     $phoneNumber: String!
-    $idNumber: String!
   ) {
     updateUser(
-      firstName: $firstName
-      lastName: $lastName
-      phoneNumber: $phoneNumber
-      idNumber: $idNumber
+      updateInput: {
+        idNumber: $idNumber
+        firstName: $firstName
+        lastName: $lastName
+        phoneNumber: $phoneNumber
+      }
     ) {
+      idNumber
       firstName
       lastName
       phoneNumber
-      idNumber
     }
   }
 `;
