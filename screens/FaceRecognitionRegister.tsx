@@ -89,9 +89,11 @@ export default function FaceRecognitionRegister({ route }) {
               alignSelf: 'center',
               fontWeight: 'bold',
               marginTop: 20,
+              textAlign: 'center',
             }}
           >
-            Please align your eyes in the frame frame.
+            Please align your eyes in the frame. Press next when you're in your
+            comfortable position.
           </Text>
           <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <Button
