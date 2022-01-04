@@ -143,9 +143,10 @@ export default function FaceRecognitionLogin() {
               alignSelf: 'center',
               fontStyle: 'italic',
               marginTop: 20,
+              textAlign: 'center'
             }}
           >
-            Your chin should be aligned to the bottom border of the frame.
+            Align your eyes in the eye frames. The begining of your inner ayes should be aligned to the inner points of the eye frames. 
           </Text>
           <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <Button
