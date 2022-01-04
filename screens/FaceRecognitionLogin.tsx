@@ -201,9 +201,6 @@ export default function FaceRecognitionLogin() {
 const styles = StyleSheet.create({
   camera: {
     height: 550,
-    borderColor: '#B4CFEC',
-    borderWidth: 6,
-    borderStyle: 'solid',
   },
   frame: {
     alignSelf: 'center',
