@@ -13,7 +13,8 @@ import SplashScreen from '../screens/SplashScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
-import FaceRecorgnitionRegister from '../screens/FaceRecognitionRegister';
+import FaceRecognitionRegister from '../screens/FaceRecognitionRegister';
+import FinishRegistration from '../screens/FinishRegistration';
 import FaceRecorgnitionLogin from '../screens/FaceRecognitionLogin';
 import FaceRecorgnition from '../screens/FaceRecognition';
 import UserDetails from '../screens/UserDetails';
@@ -45,6 +46,12 @@ function RootNavigator() {
       }}
     >
       <Stack.Screen
+        name="SplashScreen"
+        component={SplashScreen}
+        options={{ title: 'Hello' }}
+      />
+
+      <Stack.Screen
         name="SignInScreen"
         component={SignInScreen}
         options={{ title: 'Sign In' }}
@@ -55,9 +62,15 @@ function RootNavigator() {
         options={{ title: 'Sign Up' }}
       />
       <Stack.Screen
-        name="FaceRecorgnitionRegister"
-        component={FaceRecorgnitionRegister}
+        name="FaceRecognitionRegister"
+        component={FaceRecognitionRegister}
         options={{ title: 'Register' }}
+      />
+
+      <Stack.Screen
+        name="FinishRegistration"
+        component={FinishRegistration}
+        options={{ title: 'FInish' }}
       />
 
       <Stack.Screen
@@ -76,12 +89,6 @@ function RootNavigator() {
         name="FaceRecorgnition"
         component={FaceRecorgnition}
         options={{ title: 'Face Recorgnition' }}
-      />
-
-      <Stack.Screen
-        name="SplashScreen"
-        component={SplashScreen}
-        options={{ title: 'Hello' }}
       />
 
       <Stack.Screen
