@@ -1,6 +1,7 @@
 export type RootStackParamList = {
   SignUpScreen: undefined;
-  FaceRecorgnitionRegister: undefined;
+  FaceRecognitionRegister: undefined;
+  FinishRegistration: undefined;
   FaceRecorgnitionLogin: undefined;
   FaceRecorgnition: undefined;
   SignInScreen: undefined;

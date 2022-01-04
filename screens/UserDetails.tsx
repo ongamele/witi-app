@@ -8,44 +8,37 @@ import {
   ImageBackground,
   TextInput,
 } from 'react-native';
-import { useMutation } from '@apollo/client';
+import { gql, useMutation } from '@apollo/client';
 import { Title, Checkbox, Button } from 'react-native-paper';
 import { UPDATE_USER } from '../Graphql/Mutation';
 
 import { useNavigation } from '@react-navigation/native';
+import { Snackbar } from 'react-native-paper';
 
 const UserDetails = ({ route }) => {
+  const [visible, setVisible] = React.useState(false);
+
+  const onDismissSnackBar = () => setVisible(false);
+
+  const [updateUser, { data, error, loading }] = useMutation(UPDATE_USER);
   const navigation = useNavigation();
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phoneNumber, setPhoneNo] = useState('');
-  const [idNumber, setIdNumber] = useState('');
+  const [firstName, setFirstName] = useState(route.params.Name);
+  const [lastName, setLastName] = useState(route.params.Surname);
+  const [phoneNumber, setPhoneNo] = useState(route.params.Phone);
+  const [idNumber, setIdNumber] = useState(route.params.IdNumber);
 
-  const faceWidth = route.params.faceWidth;
-
-  const [updateUser, { data, error, loading }] = useMutation(UPDATE_USER, {
-    variables: {
-      firstName,
-      lastName,
-      idNumber,
-      phoneNumber,
-    },
-  });
-  {
-    data ? console.log(data.updateUser) : console.log('No data');
-  }
-
-  const onSubmit = () => {
-    updateUser({
+  async function onSubmit() {
+    setVisible(true);
+    await updateUser({
       variables: {
+        idNumber: idNumber,
         firstName: firstName,
         lastName: lastName,
-        idNumber: idNumber,
         phoneNumber: phoneNumber,
       },
     });
-  };
+  }
 
   return (
     <View style={{ padding: 20 }}>
@@ -60,28 +53,32 @@ const UserDetails = ({ route }) => {
         <TextInput
           style={styles.formInput}
           placeholder="First Name"
-          value={route.params.Name}
+          value={firstName}
+          editable
           onChangeText={(text) => setFirstName(text)}
         />
         <Text style={styles.formText}>LAST NAME</Text>
         <TextInput
           style={styles.formInput}
           placeholder="Last Name"
-          value={route.params.Surname}
+          value={lastName}
+          editable
           onChangeText={(text) => setLastName(text)}
         />
         <Text style={styles.formText}>ID NUMBER</Text>
         <TextInput
           style={styles.formInput}
           placeholder="ID Number"
-          value={route.params.IdNumber}
+          value={idNumber}
+          editable
           onChangeText={(text) => setIdNumber(text)}
         />
         <Text style={styles.formText}>PHONE</Text>
         <TextInput
           style={styles.formInput}
           placeholder="Phone Number"
-          value={route.params.Phone}
+          value={phoneNumber}
+          editable
           onChangeText={(text) => setPhoneNo(text)}
         />
 
@@ -94,10 +91,36 @@ const UserDetails = ({ route }) => {
             marginTop: 30,
             borderRadius: 22,
           }}
+          onPress={onSubmit}
         >
           Save
         </Button>
       </View>
+
+      <Snackbar
+        visible={visible}
+        onDismiss={onDismissSnackBar}
+        duration={4000}
+        action={{
+          label: 'Ok',
+          onPress: () => {},
+        }}
+        style={{ alignSelf: 'center', marginLeft: '8%' }}
+      >
+        Done!
+      </Snackbar>
+      <Text
+        style={{
+          color: '#0F0F34',
+          fontSize: 16,
+          alignSelf: 'center',
+        }}
+        onPress={() => {
+          navigation.navigate('SignInScreen', { message: '' });
+        }}
+      >
+        Logut
+      </Text>
     </View>
   );
 };

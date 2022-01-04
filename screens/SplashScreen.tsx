@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ImageBackground,
   StyleSheet,
@@ -12,17 +12,15 @@ import { useNavigation } from '@react-navigation/native';
 
 function SplashScreen() {
   const navigation = useNavigation();
-  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-  const delayFunc = async () => {
-    await delay(5000);
 
-    navigation.navigate('SignIn');
-  };
+  setTimeout(function () {
+    navigation.navigate('SignInScreen');
+  }, 5000);
 
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('./images/splash.jpg')}
+        source={require('./images/splash.png')}
         resizeMode="cover"
         style={styles.image}
       ></ImageBackground>

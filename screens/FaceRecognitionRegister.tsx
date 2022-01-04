@@ -1,22 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { gql, useMutation } from '@apollo/client';
-import { Text, View, StyleSheet, ImageBackground } from 'react-native';
+import { Text, View, StyleSheet, ImageBackground, Image } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import { Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { CREATE_USER } from '../Graphql/Mutation';
 
 export default function FaceRecognitionRegister({ route }) {
-  const [createUser, { data, error, loading }] = useMutation(CREATE_USER);
   const navigation = useNavigation();
 
   const [hasPermission, setHasPermission] = useState(null);
   const [faces, setFaces] = useState([]);
-
-  if (data) {
-    navigation.navigate('Home');
-  }
 
   const faceDetected = ({ faces }) => {
     setFaces(faces); // instead of setFaces({faces})
@@ -40,32 +33,19 @@ export default function FaceRecognitionRegister({ route }) {
   const idNumber = route.params.idNumber;
 
   const onSubmit = () => {
-    createUser({
-      variables: {
-        firstName: firstName,
-        lastName: lastName,
-        idNumber: idNumber,
-        phoneNumber: phoneNumber,
-        bottomMouthPositionX: faces[0].bottomMouthPosition.x,
-        bottomMouthPositionY: faces[0].bottomMouthPosition.y,
-        boundsX: faces[0].bounds.origin.x,
-        boundsY: faces[0].bounds.origin.y,
-        faceHeight: faces[0].bounds.size.height,
-        faceWidth: faces[0].bounds.size.width,
-      },
-    });
-
-    navigation.navigate('UserDetails', {
+    navigation.navigate('FinishRegistration', {
       Name: firstName,
       Surname: lastName,
       IdNumber: idNumber,
       Phone: phoneNumber,
+      leftEyePositionX: faces[0].leftEyePosition.x,
+      leftEyePositionY: faces[0].leftEyePosition.y,
+      boundsX: faces[0].bounds.origin.x,
+      boundsY: faces[0].bounds.origin.y,
+      faceHeight: faces[0].bounds.size.height,
+      faceWidth: faces[0].bounds.size.width,
     });
   };
-
-  if (error) {
-    alert(error);
-  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -78,10 +58,12 @@ export default function FaceRecognitionRegister({ route }) {
           detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
           runClassifications: FaceDetector.FaceDetectorClassifications.all,
           minDetectionInterval: 125,
-          tracking: false,
+          tracking: true,
         }}
       >
-        <View style={styles.insideCamera}></View>
+        <View style={styles.insideCamera}>
+          <Image style={styles.frame} source={require('./images/frame.png')} />
+        </View>
       </Camera>
       <ImageBackground
         source={require('./images/bottom-section.jpg')}
@@ -109,7 +91,7 @@ export default function FaceRecognitionRegister({ route }) {
               marginTop: 20,
             }}
           >
-            Your chin should be aligned to the bottom border of the frame.
+            Please align your eyes in the frame frame.
           </Text>
           <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <Button
@@ -140,7 +122,7 @@ export default function FaceRecognitionRegister({ route }) {
               }}
               onPress={onSubmit}
             >
-              Register
+              Next
             </Button>
           </View>
         </View>
@@ -156,20 +138,24 @@ const styles = StyleSheet.create({
     borderWidth: 6,
     borderStyle: 'solid',
   },
+  frame: {
+    alignSelf: 'center',
+    width: 200,
+    height: 250,
+    marginTop: 200,
+  },
   face: {
     flex: 1,
     backgroundColor: 'transparent',
     flexDirection: 'row',
   },
   insideCamera: {
-    height: 330,
-    width: '58%',
+    height: 406,
+    width: 300,
+    padding: 12,
+    alignContent: 'center',
+    alignItems: 'center',
     alignSelf: 'center',
-    borderColor: '#B4CFEC',
-    borderWidth: 2,
-    borderStyle: 'solid',
-    borderRadius: 1,
-    marginTop: 140,
   },
   bottomSection: {
     height: '100%',

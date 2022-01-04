@@ -1,34 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { gql, useMutation } from '@apollo/client';
-import { Text, View, StyleSheet, ImageBackground, Alert } from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  ImageBackground,
+  Alert,
+  Image,
+} from 'react-native';
 import { Camera } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import { Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { SIGN_UP } from '../Graphql/Mutation';
+import { SIGN_IN } from '../Graphql/Mutation';
+import { Snackbar } from 'react-native-paper';
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 
 export default function FaceRecognitionLogin() {
-  const [login, { data, error, loading }] = useMutation(SIGN_UP);
+  const [refreshPage, setRefreshPage] = useState('');
+  const [visible, setVisible] = React.useState(false);
+
+  const onDismissSnackBar = () => setVisible(false);
+  const [login, { data, error, loading }] = useMutation(SIGN_IN);
   const navigation = useNavigation();
 
   const [hasPermission, setHasPermission] = useState(null);
   const [faces, setFaces] = useState([]);
-
-  if (data) {
-    navigation.navigate('UserDetails', {
-      Name: data.login.firstName,
-      Surname: data.login.lastName,
-      Phone: data.login.phoneNumber,
-      IdNumber: data.login.idNumber,
-    });
-  } else {
-    //navigation.navigate('SignUpScreen');
-  }
-
-  const faceDetected = ({ faces }) => {
+  async function faceDetected({ faces }) {
     setFaces(faces); // instead of setFaces({faces})
     console.log({ faces });
-  };
+
+    if (faces[0].leftEyePosition.x && faces[0].leftEyePosition.y) {
+      await login({
+        variables: {
+          leftEyePositionX: faces[0].leftEyePosition.x,
+          leftEyePositionY: faces[0].leftEyePosition.y,
+        },
+      });
+
+      if (data) {
+        navigation.navigate('UserDetails', {
+          Name: data.login.firstName,
+          Surname: data.login.lastName,
+          Phone: data.login.phoneNumber,
+          IdNumber: data.login.idNumber,
+        });
+      }
+    } else {
+      Alert.alert('Align your into the frame.');
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -41,22 +64,34 @@ export default function FaceRecognitionLogin() {
     return <Text>No access to camera</Text>;
   }
 
-  const onSubmit = () => {
-    login({
-      variables: {
-        faceHeight: faces[0].bounds.size.height,
-        faceWidth: faces[0].bounds.size.width,
-      },
-    });
+  /*async function onSubmit() {
+    if (faces[0].leftEyePosition.x && faces[0].leftEyePosition.y) {
+      await login({
+        variables: {
+          leftEyePositionX: faces[0].leftEyePosition.x,
+          leftEyePositionY: faces[0].leftEyePosition.y,
+        },
+      });
+
+      if (data) {
+        navigation.navigate('UserDetails', {
+          Name: data.login.firstName,
+          Surname: data.login.lastName,
+          Phone: data.login.phoneNumber,
+          IdNumber: data.login.idNumber,
+        });
+      } else {
+        setVisible(true);
+        //navigation.navigate('SignUpScreen');
+      }
+    } else {
+      Alert.alert('Align your into the frame.');
+    }
 
     if (!data) {
-      Alert.alert('Please Try Again.');
+      setVisible(true);
     }
-  };
-
-  if (error) {
-    alert(error);
-  }
+  }*/
 
   return (
     <View style={{ flex: 1 }}>
@@ -68,11 +103,13 @@ export default function FaceRecognitionLogin() {
           mode: FaceDetector.FaceDetectorMode.fast,
           detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
           runClassifications: FaceDetector.FaceDetectorClassifications.all,
-          minDetectionInterval: 125,
-          tracking: false,
+          minDetectionInterval: 300,
+          tracking: true,
         }}
       >
-        <View style={styles.insideCamera}></View>
+        <View style={styles.insideCamera}>
+          <Image style={styles.frame} source={require('./images/frame.png')} />
+        </View>
       </Camera>
       <ImageBackground
         source={require('./images/bottom-section.jpg')}
@@ -80,6 +117,14 @@ export default function FaceRecognitionLogin() {
         style={styles.image}
       >
         <View style={styles.bottomSection}>
+          {faces[0] ? (
+            <Image
+              style={styles.pricessing}
+              source={require('./images/processing.gif')}
+            />
+          ) : (
+            <Text style={{ alignSelf: 'center' }}>No Face Detected</Text>
+          )}
           <Text
             style={{
               fontSize: 20,
@@ -96,7 +141,7 @@ export default function FaceRecognitionLogin() {
               fontSize: 14,
               color: 'grey',
               alignSelf: 'center',
-              fontWeight: 'bold',
+              fontStyle: 'italic',
               marginTop: 20,
             }}
           >
@@ -129,12 +174,25 @@ export default function FaceRecognitionLogin() {
                 borderWidth: 2,
                 borderStyle: 'solid',
               }}
-              onPress={onSubmit}
             >
               Sign In
             </Button>
           </View>
         </View>
+
+        <Snackbar
+          visible={visible}
+          onDismiss={onDismissSnackBar}
+          duration={4000}
+          action={{
+            label: 'Ok',
+            onPress: () => {
+              setRefreshPage('refresh');
+            },
+          }}
+        >
+          Not detected. Please try again!
+        </Snackbar>
       </ImageBackground>
     </View>
   );
@@ -147,22 +205,34 @@ const styles = StyleSheet.create({
     borderWidth: 6,
     borderStyle: 'solid',
   },
+  frame: {
+    alignSelf: 'center',
+    width: 200,
+    height: 250,
+    marginTop: 200,
+  },
+
+  pricessing: {
+    width: 30,
+    height: 30,
+    zIndex: 10,
+    alignSelf: 'center',
+  },
   face: {
     flex: 1,
     backgroundColor: 'transparent',
     flexDirection: 'row',
   },
   insideCamera: {
-    height: 330,
-    width: '58%',
+    height: 406,
+    width: 300,
+    padding: 12,
+    alignContent: 'center',
+    alignItems: 'center',
     alignSelf: 'center',
-    borderColor: '#B4CFEC',
-    borderWidth: 2,
-    borderStyle: 'solid',
-    borderRadius: 1,
-    marginTop: 140,
   },
   bottomSection: {
+    paddingTop: 12,
     height: '100%',
   },
 

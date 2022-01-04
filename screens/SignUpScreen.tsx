@@ -12,14 +12,17 @@ import { Title, Checkbox, Button } from 'react-native-paper';
 
 import { useNavigation } from '@react-navigation/native';
 
-const SignUpScreen = () => {
+const SignUpScreen = ({ route }) => {
   const navigation = useNavigation();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNo] = useState('');
   const [idNumber, setIdNumber] = useState('');
-  const [checked, setTerms] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const [terms, setTerms] = useState(false);
+  const [issues, setIssues] = useState(false);
+  const message = route.params.message;
 
   return (
     <View style={{ padding: 20 }}>
@@ -29,6 +32,11 @@ const SignUpScreen = () => {
       >
         <Title style={styles.headerText}>SIGN UP</Title>
       </ImageBackground>
+      {message ? (
+        <Text style={{ color: 'red', alignSelf: 'center' }}>{message}</Text>
+      ) : (
+        <Text></Text>
+      )}
       <View style={styles.form}>
         <Text style={styles.formText}>FIRST NAME</Text>
         <TextInput
@@ -71,9 +79,9 @@ const SignUpScreen = () => {
         <View style={styles.section}>
           <Checkbox
             style={styles.checkbox}
-            status={checked ? 'checked' : 'unchecked'}
+            status={terms ? 'checked' : 'unchecked'}
             onPress={() => {
-              setTerms(!checked);
+              setTerms(!terms);
             }}
           />
           <Text>Accept Terms</Text>
@@ -81,12 +89,39 @@ const SignUpScreen = () => {
         <Button
           color="#ffffff"
           onPress={() => {
-            navigation.navigate('FaceRecorgnitionRegister', {
-              firstName: firstName,
-              lastName: lastName,
-              idNumber: idNumber,
-              phoneNumber: phoneNumber,
-            });
+            if (!checked && !terms) {
+              setIssues(true);
+              navigation.navigate('SignUpScreen', {
+                message: 'Please accept terms and conditions to continue!',
+              });
+            }
+
+            if (
+              firstName == '' &&
+              lastName == '' &&
+              idNumber == '' &&
+              phoneNumber == ''
+            ) {
+              setIssues(true);
+              navigation.navigate('SignUpScreen', {
+                message: 'Please fill in all fields!',
+              });
+            }
+            if (
+              firstName != '' &&
+              lastName != '' &&
+              idNumber != '' &&
+              phoneNumber != '' &&
+              checked &&
+              terms
+            ) {
+              navigation.navigate('FaceRecognitionRegister', {
+                firstName: firstName,
+                lastName: lastName,
+                idNumber: idNumber,
+                phoneNumber: phoneNumber,
+              });
+            }
           }}
           style={{
             width: 250,
@@ -99,6 +134,19 @@ const SignUpScreen = () => {
         >
           Next
         </Button>
+        <Text
+          style={{
+            color: '#0F0F34',
+            fontSize: 16,
+            alignSelf: 'center',
+            marginTop: 13,
+          }}
+          onPress={() => {
+            navigation.navigate('SignInScreen');
+          }}
+        >
+          Cancel
+        </Text>
       </View>
     </View>
   );

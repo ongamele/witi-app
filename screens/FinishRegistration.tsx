@@ -9,15 +9,47 @@ import {
   Image,
 } from 'react-native';
 import { Button } from 'react-native-paper';
-import { RootTabScreenProps } from '../types';
+import { gql, useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-import FaceRecognitionLogin from './FaceRecognitionLogin';
+import { CREATE_USER } from '../Graphql/Mutation';
 
-function SignInScreen() {
+function FinishRegistration({ route }) {
+  const [createUser, { data, error, loading }] = useMutation(CREATE_USER);
   const navigation = useNavigation();
 
+  const firstName = route.params.Name;
+  const lastName = route.params.Surname;
+  const phoneNumber = route.params.Phone;
+  const idNumber = route.params.IdNumber;
+  const leftEyePositionX = route.params.leftEyePositionX;
+  const constleftEyePositionY = route.params.leftEyePositionY;
+  const boundsX = route.params.boundsX;
+  const boundsY = route.params.boundsY;
+  const faceHeight = route.params.faceHeight;
+  const faceWidth = route.params.faceWidth;
+
   const onSubmit = () => {
-    //Sign user in
+    createUser({
+      variables: {
+        firstName: firstName,
+        lastName: lastName,
+        idNumber: idNumber,
+        phoneNumber: phoneNumber,
+        leftEyePositionX: leftEyePositionX,
+        leftEyePositionY: constleftEyePositionY,
+        boundsX: boundsX,
+        boundsY: boundsY,
+        faceHeight: faceHeight,
+        faceWidth: faceWidth,
+      },
+    });
+
+    navigation.navigate('UserDetails', {
+      Name: firstName,
+      Surname: lastName,
+      IdNumber: idNumber,
+      Phone: phoneNumber,
+    });
   };
 
   return (
@@ -30,11 +62,8 @@ function SignInScreen() {
         <Image style={styles.logo} source={require('./images/logo.png')} />
         <View style={{ marginBottom: 100 }}>
           <Button
-            icon="login"
             color="#ffffff"
-            onPress={() => {
-              navigation.navigate('FaceRecorgnitionLogin');
-            }}
+            onPress={onSubmit}
             style={{
               width: 260,
               height: 50,
@@ -44,7 +73,7 @@ function SignInScreen() {
               paddingTop: 6,
             }}
           >
-            Sign In
+            Finish
           </Button>
           <Text
             style={{
@@ -54,10 +83,10 @@ function SignInScreen() {
               marginTop: 13,
             }}
             onPress={() => {
-              navigation.navigate('SignUpScreen', { message: '' });
+              navigation.navigate('SignInScreen');
             }}
           >
-            New here? Sign up
+            Cancel Registration
           </Text>
         </View>
         <Image style={styles.curve} source={require('./images/curves.png')} />
@@ -97,4 +126,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignInScreen;
+export default FinishRegistration;
