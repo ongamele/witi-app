@@ -16,12 +16,25 @@ import { useNavigation } from '@react-navigation/native';
 import { SIGN_IN } from '../Graphql/Mutation';
 import { Snackbar } from 'react-native-paper';
 import { LogBox } from 'react-native';
-import { supabase } from '../supabase-service';
+//import { supabase } from '../supabase-service';
+
+  import { createClient } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 
 export default function FaceRecognitionLogin() {
+
+
+const SUPABASE_PUBLIC_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MTg4MTQyMywiZXhwIjoxOTU3NDU3NDIzfQ.AZlB2zev6cIIajJf9_bWbxNWVSKXwTuoYHI2iBTLCe8";
+const SUPABASE_URL = "https://vlxkgewzbkitgpipqpst.supabase.co";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
+  localStorage: AsyncStorage,
+});
+  
+  
   const cam = useRef<Camera | null>();
   const [refreshPage, setRefreshPage] = useState('');
   const [visible, setVisible] = React.useState(false);
