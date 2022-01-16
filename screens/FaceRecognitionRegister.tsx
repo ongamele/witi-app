@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Text, View, StyleSheet, ImageBackground, Image } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
@@ -6,6 +6,7 @@ import { Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
 export default function FaceRecognitionRegister({ route }) {
+  const cam = useRef<Camera | null>();
   const navigation = useNavigation();
 
   const [hasPermission, setHasPermission] = useState(null);
@@ -13,12 +14,12 @@ export default function FaceRecognitionRegister({ route }) {
 
   const faceDetected = ({ faces }) => {
     setFaces(faces); // instead of setFaces({faces})
-    console.log({ faces });
+    //console.log({ faces });
   };
 
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestPermissionsAsync();
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
@@ -32,19 +33,45 @@ export default function FaceRecognitionRegister({ route }) {
   const phoneNumber = route.params.phoneNumber;
   const idNumber = route.params.idNumber;
 
-  const onSubmit = () => {
-    navigation.navigate('FinishRegistration', {
-      Name: firstName,
-      Surname: lastName,
-      IdNumber: idNumber,
-      Phone: phoneNumber,
-      leftEyePositionX: faces[0].leftEyePosition.x,
-      leftEyePositionY: faces[0].leftEyePosition.y,
-      boundsX: faces[0].bounds.origin.x,
-      boundsY: faces[0].bounds.origin.y,
-      faceHeight: faces[0].bounds.size.height,
-      faceWidth: faces[0].bounds.size.width,
-    });
+  const onSubmit = async () => {
+    if (cam.current) {
+      const options = { quality: 0.5, base64: true, skipProcessing: true };
+      let photo = await cam.current.takePictureAsync(options);
+      const source = photo.uri;
+      //console.log(source);
+      const fileName = source.replace(/^.*[\\\/]/, '');
+      const ext = source.substring(source.lastIndexOf('.') + 1);
+      var formData = new FormData();
+      formData.append('file', {
+        uri: source,
+        name: fileName,
+        type: `image/${ext}`,
+      });
+
+      /*const response = await fetch(source);
+      const blob = await response.blob();
+      //console.log(blob);
+      const { data, error } = await supabase.storage
+        .from('witi-bucket')
+        .upload(fileName, formData);
+      if (error) {
+        console.log(error);
+      } else {
+        // console.log(data);
+      }*/
+
+      //return { ...photo, imageData: data };
+
+      navigation.navigate('FinishRegistration', {
+        Name: firstName,
+        Surname: lastName,
+        IdNumber: idNumber,
+        Phone: phoneNumber,
+        fileName: fileName,
+        formData: formData,
+        faceImage: fileName,
+      });
+    }
   };
 
   return (
@@ -52,6 +79,7 @@ export default function FaceRecognitionRegister({ route }) {
       <Camera
         style={styles.camera}
         type="front"
+        ref={cam}
         onFacesDetected={faceDetected}
         faceDetectorSettings={{
           mode: FaceDetector.FaceDetectorMode.fast,
@@ -81,19 +109,6 @@ export default function FaceRecognitionRegister({ route }) {
             }}
           >
             FIT YOUR FACE IN THE FRAME
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              color: 'grey',
-              alignSelf: 'center',
-              fontWeight: 'bold',
-              marginTop: 20,
-              textAlign: 'center',
-            }}
-          >
-            Please align your eyes in the frame. Press next when you're in your
-            comfortable position.
           </Text>
           <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <Button
@@ -141,7 +156,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 200,
     height: 250,
-    marginTop: 200,
+    marginTop: '35%',
   },
   face: {
     flex: 1,
@@ -150,7 +165,7 @@ const styles = StyleSheet.create({
   },
   insideCamera: {
     height: 406,
-    width: 300,
+    width: '100%',
     padding: 12,
     alignContent: 'center',
     alignItems: 'center',

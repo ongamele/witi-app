@@ -12,6 +12,7 @@ import { Button } from 'react-native-paper';
 import { gql, useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import { CREATE_USER } from '../Graphql/Mutation';
+import { supabase } from '../supabase-service';
 
 function FinishRegistration({ route }) {
   const [createUser, { data, error, loading }] = useMutation(CREATE_USER);
@@ -21,34 +22,37 @@ function FinishRegistration({ route }) {
   const lastName = route.params.Surname;
   const phoneNumber = route.params.Phone;
   const idNumber = route.params.IdNumber;
-  const leftEyePositionX = route.params.leftEyePositionX;
-  const constleftEyePositionY = route.params.leftEyePositionY;
-  const boundsX = route.params.boundsX;
-  const boundsY = route.params.boundsY;
-  const faceHeight = route.params.faceHeight;
-  const faceWidth = route.params.faceWidth;
+  const fileName = route.params.fileName;
+  const formData = route.params.formData;
+  //console.log(formData);
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
+    const { data, error } = await supabase.storage
+      .from('witi-bucket')
+      .upload(fileName, formData);
+    if (error) {
+      console.log(error);
+    } else {
+      // console.log(data);
+    }
     createUser({
       variables: {
         firstName: firstName,
         lastName: lastName,
         idNumber: idNumber,
         phoneNumber: phoneNumber,
-        leftEyePositionX: leftEyePositionX,
-        leftEyePositionY: constleftEyePositionY,
-        boundsX: boundsX,
-        boundsY: boundsY,
-        faceHeight: faceHeight,
-        faceWidth: faceWidth,
+        faceImage: fileName,
       },
     });
+
+    //return { ...photo, imageData: data };
 
     navigation.navigate('UserDetails', {
       Name: firstName,
       Surname: lastName,
       IdNumber: idNumber,
       Phone: phoneNumber,
+      faceImage: fileName,
     });
   };
 

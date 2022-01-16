@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import {
   Text,
@@ -9,16 +9,20 @@ import {
   Image,
 } from 'react-native';
 import { Camera } from 'expo-camera';
+import * as FileSystem from 'expo-file-system';
 import * as FaceDetector from 'expo-face-detector';
 import { Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { SIGN_IN } from '../Graphql/Mutation';
 import { Snackbar } from 'react-native-paper';
 import { LogBox } from 'react-native';
+import { supabase } from '../supabase-service';
+
 LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 
 export default function FaceRecognitionLogin() {
+  const cam = useRef<Camera | null>();
   const [refreshPage, setRefreshPage] = useState('');
   const [visible, setVisible] = React.useState(false);
 
@@ -28,34 +32,60 @@ export default function FaceRecognitionLogin() {
 
   const [hasPermission, setHasPermission] = useState(null);
   const [faces, setFaces] = useState([]);
-  async function faceDetected({ faces }) {
-    setFaces(faces); // instead of setFaces({faces})
-    console.log({ faces });
 
-    if (faces[0].leftEyePosition.x && faces[0].leftEyePosition.y) {
+  async function faceDetected({ faces }) {
+    setFaces(faces);
+  }
+
+  const _takePicture = async () => {
+    if (cam.current) {
+      const options = { quality: 0.5, base64: true, skipProcessing: true };
+      let photo = await cam.current.takePictureAsync(options);
+      const source = photo.uri;
+      console.log(source);
+      const fileName = source.replace(/^.*[\\\/]/, '');
+      const ext = source.substring(source.lastIndexOf('.') + 1);
+      var formData = new FormData();
+      formData.append('file', {
+        uri: source,
+        name: fileName,
+        type: `image/${ext}`,
+      });
+
+      const { faceData, error } = await supabase.storage
+        .from('witi-bucket/logins')
+        .upload(fileName, formData);
+      if (error) {
+        console.log(error);
+      } else {
+        // console.log(data);
+      }
+
+      // console.log(fd);
+
       await login({
         variables: {
-          leftEyePositionX: faces[0].leftEyePosition.x,
-          leftEyePositionY: faces[0].leftEyePosition.y,
+          faceImage: fileName,
         },
       });
 
-      if (data) {
+      if (await data) {
+        console.log(data);
         navigation.navigate('UserDetails', {
           Name: data.login.firstName,
           Surname: data.login.lastName,
           Phone: data.login.phoneNumber,
           IdNumber: data.login.idNumber,
         });
+      } else {
+        console.log('No data');
       }
-    } else {
-      Alert.alert('Align your into the frame.');
     }
-  }
+  };
 
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestPermissionsAsync();
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
@@ -64,40 +94,12 @@ export default function FaceRecognitionLogin() {
     return <Text>No access to camera</Text>;
   }
 
-  /*async function onSubmit() {
-    if (faces[0].leftEyePosition.x && faces[0].leftEyePosition.y) {
-      await login({
-        variables: {
-          leftEyePositionX: faces[0].leftEyePosition.x,
-          leftEyePositionY: faces[0].leftEyePosition.y,
-        },
-      });
-
-      if (data) {
-        navigation.navigate('UserDetails', {
-          Name: data.login.firstName,
-          Surname: data.login.lastName,
-          Phone: data.login.phoneNumber,
-          IdNumber: data.login.idNumber,
-        });
-      } else {
-        setVisible(true);
-        //navigation.navigate('SignUpScreen');
-      }
-    } else {
-      Alert.alert('Align your into the frame.');
-    }
-
-    if (!data) {
-      setVisible(true);
-    }
-  }*/
-
   return (
     <View style={{ flex: 1 }}>
       <Camera
         style={styles.camera}
         type="front"
+        ref={cam}
         onFacesDetected={faceDetected}
         faceDetectorSettings={{
           mode: FaceDetector.FaceDetectorMode.fast,
@@ -136,18 +138,6 @@ export default function FaceRecognitionLogin() {
           >
             FIT YOUR FACE IN THE FRAME
           </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              color: 'grey',
-              alignSelf: 'center',
-              fontStyle: 'italic',
-              marginTop: 20,
-              textAlign: 'center'
-            }}
-          >
-            Align your eyes in the eye frames. The begining of your inner ayes should be aligned to the inner points of the eye frames. 
-          </Text>
           <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <Button
               color="#ffffff"
@@ -175,6 +165,7 @@ export default function FaceRecognitionLogin() {
                 borderWidth: 2,
                 borderStyle: 'solid',
               }}
+              onPress={_takePicture}
             >
               Sign In
             </Button>
@@ -207,7 +198,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 200,
     height: 250,
-    marginTop: 200,
+    marginTop: '35%',
   },
 
   pricessing: {
@@ -223,7 +214,7 @@ const styles = StyleSheet.create({
   },
   insideCamera: {
     height: 406,
-    width: 300,
+    width: '100%',
     padding: 12,
     alignContent: 'center',
     alignItems: 'center',

@@ -13,7 +13,7 @@ import { Title, Checkbox, Button } from 'react-native-paper';
 import { UPDATE_USER } from '../Graphql/Mutation';
 
 import { useNavigation } from '@react-navigation/native';
-import { Snackbar } from 'react-native-paper';
+import { Snackbar, Avatar } from 'react-native-paper';
 
 const UserDetails = ({ route }) => {
   const [visible, setVisible] = React.useState(false);
@@ -27,6 +27,7 @@ const UserDetails = ({ route }) => {
   const [lastName, setLastName] = useState(route.params.Surname);
   const [phoneNumber, setPhoneNo] = useState(route.params.Phone);
   const [idNumber, setIdNumber] = useState(route.params.IdNumber);
+  const faceImage = route.params.faceImage;
 
   async function onSubmit() {
     setVisible(true);
@@ -49,6 +50,13 @@ const UserDetails = ({ route }) => {
         <Title style={styles.headerText}>My Details</Title>
       </ImageBackground>
       <View style={styles.form}>
+        <Avatar.Image
+          style={{ alignSelf: 'center', marginBottom: 20 }}
+          size={50}
+          source={{
+            uri: `https://vlxkgewzbkitgpipqpst.supabase.in/storage/v1/object/public/witi-bucket/${faceImage}`,
+          }}
+        />
         <Text style={styles.formText}>FIRST NAME</Text>
         <TextInput
           style={styles.formInput}
@@ -147,7 +155,7 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   formText: {
-    marginTop: 16,
+    marginTop: 12,
     color: '#A5C0E5',
     fontSize: 12,
   },
