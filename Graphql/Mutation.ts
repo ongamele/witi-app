@@ -6,12 +6,7 @@ export const CREATE_USER = gql`
     $lastName: String!
     $idNumber: String!
     $phoneNumber: String!
-    $leftEyePositionX: Float!
-    $leftEyePositionY: Float!
-    $boundsX: Float!
-    $boundsY: Float!
-    $faceHeight: Float!
-    $faceWidth: Float!
+    $faceImage: String!
   ) {
     createUser(
       registerInput: {
@@ -19,44 +14,26 @@ export const CREATE_USER = gql`
         lastName: $lastName
         idNumber: $idNumber
         phoneNumber: $phoneNumber
-        leftEyePositionX: $leftEyePositionX
-        leftEyePositionY: $leftEyePositionY
-        boundsX: $boundsX
-        boundsY: $boundsY
-        faceHeight: $faceHeight
-        faceWidth: $faceWidth
+        faceImage: $faceImage
       }
     ) {
       firstName
       lastName
       idNumber
       phoneNumber
-      leftEyePositionX
-      leftEyePositionY
-      boundsX
-      boundsY
-      faceHeight
-      faceWidth
+      faceImage
     }
   }
 `;
 
 export const SIGN_IN = gql`
-  mutation login($leftEyePositionX: Float!, $leftEyePositionY: Float!) {
-    login(
-      leftEyePositionX: $leftEyePositionX
-      leftEyePositionY: $leftEyePositionY
-    ) {
+  mutation login($faceImage: String!) {
+    login(faceImage: $faceImage) {
       firstName
       lastName
       idNumber
       phoneNumber
-      leftEyePositionX
-      leftEyePositionY
-      boundsX
-      boundsY
-      faceHeight
-      faceWidth
+      faceImage
     }
   }
 `;
