@@ -17,6 +17,7 @@ import { Snackbar, Avatar } from 'react-native-paper';
 
 const UserDetails = ({ route }) => {
   const [visible, setVisible] = React.useState(false);
+  const [showCamera, setShowCamera] = React.useState(true);
 
   const onDismissSnackBar = () => setVisible(false);
 
@@ -27,7 +28,7 @@ const UserDetails = ({ route }) => {
   const [lastName, setLastName] = useState(route.params.Surname);
   const [phoneNumber, setPhoneNo] = useState(route.params.Phone);
   const [idNumber, setIdNumber] = useState(route.params.IdNumber);
-  const faceImage = route.params.faceImage;
+  const [faceImage, setFaceImage] = useState(route.params.faceImage);
 
   async function onSubmit() {
     setVisible(true);
@@ -54,7 +55,7 @@ const UserDetails = ({ route }) => {
           style={{ alignSelf: 'center', marginBottom: 20 }}
           size={50}
           source={{
-            uri: `https://vlxkgewzbkitgpipqpst.supabase.in/storage/v1/object/public/witi-bucket/${faceImage}`,
+            uri: `https://vlxkgewzbkitgpipqpst.supabase.in/storage/v1/object/public/witi-bucket/users/${faceImage}`,
           }}
         />
         <Text style={styles.formText}>FIRST NAME</Text>

@@ -76,28 +76,31 @@ export default function FaceRecognitionRegister({ route }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <Camera
-        style={styles.camera}
-        type="front"
-        ref={cam}
-        onFacesDetected={faceDetected}
-        faceDetectorSettings={{
-          mode: FaceDetector.FaceDetectorMode.fast,
-          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-          runClassifications: FaceDetector.FaceDetectorClassifications.all,
-          minDetectionInterval: 125,
-          tracking: true,
-        }}
-      >
-        <View style={styles.insideCamera}>
-          <Image style={styles.frame} source={require('./images/frame.png')} />
-        </View>
-      </Camera>
       <ImageBackground
         source={require('./images/bottom-section.jpg')}
         resizeMode="cover"
         style={styles.image}
       >
+        <Camera
+          style={styles.camera}
+          type="front"
+          ref={cam}
+          onFacesDetected={faceDetected}
+          faceDetectorSettings={{
+            mode: FaceDetector.FaceDetectorMode.fast,
+            detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+            runClassifications: FaceDetector.FaceDetectorClassifications.all,
+            minDetectionInterval: 125,
+            tracking: true,
+          }}
+        >
+          <View style={styles.insideCamera}>
+            <Image
+              style={styles.frame}
+              source={require('./images/frame.png')}
+            />
+          </View>
+        </Camera>
         <View style={styles.bottomSection}>
           <Text
             style={{
@@ -172,7 +175,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   bottomSection: {
-    height: '100%',
+    paddingTop: 12,
   },
 
   image: {

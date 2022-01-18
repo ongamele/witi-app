@@ -16,28 +16,15 @@ import { useNavigation } from '@react-navigation/native';
 import { SIGN_IN } from '../Graphql/Mutation';
 import { Snackbar } from 'react-native-paper';
 import { LogBox } from 'react-native';
-//import { supabase } from '../supabase-service';
-
-  import { createClient } from '@supabase/supabase-js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../supabase-service';
 
 LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 
 export default function FaceRecognitionLogin() {
-
-
-const SUPABASE_PUBLIC_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MTg4MTQyMywiZXhwIjoxOTU3NDU3NDIzfQ.AZlB2zev6cIIajJf9_bWbxNWVSKXwTuoYHI2iBTLCe8";
-const SUPABASE_URL = "https://vlxkgewzbkitgpipqpst.supabase.co";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
-  localStorage: AsyncStorage,
-});
-  
-  
   const cam = useRef<Camera | null>();
-  const [refreshPage, setRefreshPage] = useState('');
   const [visible, setVisible] = React.useState(false);
+  const [showCamera, setShowCamera] = React.useState(true);
 
   const onDismissSnackBar = () => setVisible(false);
   const [login, { data, error, loading }] = useMutation(SIGN_IN);
@@ -65,11 +52,13 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
         type: `image/${ext}`,
       });
 
-      const { faceData, error } = await supabase.storage
+      setShowCamera(false);
+
+      const { faceData, error: ete } = await supabase.storage
         .from('witi-bucket/logins')
         .upload(fileName, formData);
       if (error) {
-        console.log(error);
+        console.log(ete);
       } else {
         // console.log(data);
       }
@@ -81,20 +70,20 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
           faceImage: fileName,
         },
       });
+    }
+  };
 
-      if (await data) {
-        console.log(data);
-        navigation.navigate('UserDetails', {
+  {
+    data
+      ? navigation.navigate('UserDetails', {
           Name: data.login.firstName,
           Surname: data.login.lastName,
           Phone: data.login.phoneNumber,
           IdNumber: data.login.idNumber,
-        });
-      } else {
-        console.log('No data');
-      }
-    }
-  };
+          faceImage: data.login.faceImage,
+        })
+      : loading;
+  }
 
   useEffect(() => {
     (async () => {
@@ -109,96 +98,159 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
 
   return (
     <View style={{ flex: 1 }}>
-      <Camera
-        style={styles.camera}
-        type="front"
-        ref={cam}
-        onFacesDetected={faceDetected}
-        faceDetectorSettings={{
-          mode: FaceDetector.FaceDetectorMode.fast,
-          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-          runClassifications: FaceDetector.FaceDetectorClassifications.all,
-          minDetectionInterval: 300,
-          tracking: true,
-        }}
-      >
-        <View style={styles.insideCamera}>
-          <Image style={styles.frame} source={require('./images/frame.png')} />
-        </View>
-      </Camera>
-      <ImageBackground
-        source={require('./images/bottom-section.jpg')}
-        resizeMode="cover"
-        style={styles.image}
-      >
-        <View style={styles.bottomSection}>
-          {faces[0] ? (
+      {showCamera ? (
+        <ImageBackground
+          source={require('./images/bottom-section.jpg')}
+          resizeMode="cover"
+          style={styles.image}
+        >
+          <Camera
+            style={styles.camera}
+            type="front"
+            ref={cam}
+            onFacesDetected={faceDetected}
+            faceDetectorSettings={{
+              mode: FaceDetector.FaceDetectorMode.fast,
+              detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+              runClassifications: FaceDetector.FaceDetectorClassifications.all,
+              minDetectionInterval: 300,
+              tracking: true,
+            }}
+          >
+            <View style={styles.insideCamera}>
+              <Image
+                style={styles.frame}
+                source={require('./images/frame.png')}
+              />
+            </View>
+          </Camera>
+          <View style={styles.bottomSection}>
+            <Text
+              style={{
+                fontSize: 20,
+                color: '#2E3361',
+                alignSelf: 'center',
+                fontWeight: 'bold',
+                marginTop: 40,
+              }}
+            >
+              FIT YOUR FACE IN THE FRAME
+            </Text>
+            <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
+              <Button
+                color="#ffffff"
+                onPress={() => navigation.navigate('SignInScreen')}
+                style={{
+                  width: 134,
+                  backgroundColor: '#135A8C',
+                  alignSelf: 'center',
+                  marginTop: 40,
+                  marginRight: 8,
+                  borderRadius: 22,
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="#135A8C"
+                style={{
+                  width: 134,
+                  backgroundColor: '#ffffff',
+                  alignSelf: 'center',
+                  marginTop: 40,
+                  borderRadius: 22,
+                  borderColor: '#135A8C',
+                  borderWidth: 2,
+                  borderStyle: 'solid',
+                }}
+                onPress={_takePicture}
+              >
+                Sign In
+              </Button>
+            </View>
+          </View>
+
+          <Snackbar
+            visible={visible}
+            onDismiss={onDismissSnackBar}
+            duration={4000}
+            action={{
+              label: 'Ok',
+              onPress: () => {
+                setRefreshPage('refresh');
+              },
+            }}
+          >
+            Not detected. Please try again!
+          </Snackbar>
+        </ImageBackground>
+      ) : (
+        <ImageBackground
+          source={require('./images/bottom-section.jpg')}
+          resizeMode="cover"
+          style={styles.image}
+        >
+          <View style={styles.bottomSection}>
             <Image
               style={styles.pricessing}
               source={require('./images/processing.gif')}
             />
-          ) : (
-            <Text style={{ alignSelf: 'center' }}>No Face Detected</Text>
-          )}
-          <Text
-            style={{
-              fontSize: 20,
-              color: '#2E3361',
-              alignSelf: 'center',
-              fontWeight: 'bold',
-              marginTop: 40,
+            <Text
+              style={{
+                fontSize: 14,
+                color: '#2E3361',
+                alignSelf: 'center',
+                marginTop: 14,
+              }}
+            >
+              Trying to log you in...
+            </Text>
+          </View>
+          <View style={styles.bottomSection}>
+            <Text
+              style={{
+                fontSize: 20,
+                color: '#2E3361',
+                alignSelf: 'center',
+                fontWeight: 'bold',
+                marginTop: 40,
+              }}
+            >
+              WE ARE VERIFYING YOUR FACE
+            </Text>
+            <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
+              <Button
+                color="#ffffff"
+                onPress={() => navigation.navigate('SignInScreen')}
+                style={{
+                  width: 134,
+                  backgroundColor: '#135A8C',
+                  alignSelf: 'center',
+                  marginTop: 40,
+                  marginRight: 8,
+                  borderRadius: 22,
+                }}
+              >
+                Cancel
+              </Button>
+            </View>
+          </View>
+
+          <Snackbar
+            visible={visible}
+            onDismiss={onDismissSnackBar}
+            duration={4000}
+            action={{
+              label: 'Ok',
+              onPress: () => {
+                setRefreshPage('refresh');
+              },
             }}
           >
-            FIT YOUR FACE IN THE FRAME
-          </Text>
-          <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
-            <Button
-              color="#ffffff"
-              onPress={() => navigation.navigate('SignInScreen')}
-              style={{
-                width: 134,
-                backgroundColor: '#135A8C',
-                alignSelf: 'center',
-                marginTop: 40,
-                marginRight: 8,
-                borderRadius: 22,
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="#135A8C"
-              style={{
-                width: 134,
-                backgroundColor: '#ffffff',
-                alignSelf: 'center',
-                marginTop: 40,
-                borderRadius: 22,
-                borderColor: '#135A8C',
-                borderWidth: 2,
-                borderStyle: 'solid',
-              }}
-              onPress={_takePicture}
-            >
-              Sign In
-            </Button>
-          </View>
-        </View>
-
-        <Snackbar
-          visible={visible}
-          onDismiss={onDismissSnackBar}
-          duration={4000}
-          action={{
-            label: 'Ok',
-            onPress: () => {
-              setRefreshPage('refresh');
-            },
-          }}
-        >
-          Not detected. Please try again!
-        </Snackbar>
-      </ImageBackground>
+            Not detected. Please try again!
+          </Snackbar>
+        </ImageBackground>
+      )}
     </View>
   );
 }
@@ -235,7 +287,6 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     paddingTop: 12,
-    height: '100%',
   },
 
   image: {

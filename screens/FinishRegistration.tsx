@@ -28,7 +28,7 @@ function FinishRegistration({ route }) {
 
   const onSubmit = async () => {
     const { data, error } = await supabase.storage
-      .from('witi-bucket')
+      .from('witi-bucket/users')
       .upload(fileName, formData);
     if (error) {
       console.log(error);
