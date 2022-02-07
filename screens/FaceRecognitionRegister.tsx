@@ -28,10 +28,10 @@ export default function FaceRecognitionRegister({ route }) {
     return <Text>No access to camera</Text>;
   }
 
-  const firstName = route.params.firstName;
-  const lastName = route.params.lastName;
-  const phoneNumber = route.params.phoneNumber;
-  const idNumber = route.params.idNumber;
+  const firstName = route.params.Name;
+  const lastName = route.params.Surname;
+  const phoneNumber = route.params.Phone;
+  const idNumber = route.params.IdNumber;
 
   const onSubmit = async () => {
     if (cam.current) {

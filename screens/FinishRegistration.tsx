@@ -16,6 +16,7 @@ import { supabase } from '../supabase-service';
 
 function FinishRegistration({ route }) {
   const [createUser, { data, error, loading }] = useMutation(CREATE_USER);
+  const [showFinish, setShowFinish] = React.useState(true);
   const navigation = useNavigation();
 
   const firstName = route.params.Name;
@@ -27,6 +28,7 @@ function FinishRegistration({ route }) {
   //console.log(formData);
 
   const onSubmit = async () => {
+    setShowFinish(false);
     const { data, error } = await supabase.storage
       .from('witi-bucket/users')
       .upload(fileName, formData);
@@ -58,43 +60,85 @@ function FinishRegistration({ route }) {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={require('./images/background.jpg')}
-        resizeMode="cover"
-        style={styles.image}
-      >
-        <Image style={styles.logo} source={require('./images/logo.png')} />
-        <View style={{ marginBottom: 100 }}>
-          <Button
-            color="#ffffff"
-            onPress={onSubmit}
-            style={{
-              width: 260,
-              height: 50,
-              backgroundColor: '#0F0F34',
-              alignSelf: 'center',
-              borderRadius: 30,
-              paddingTop: 6,
-            }}
-          >
-            Finish
-          </Button>
-          <Text
-            style={{
-              color: '#0F0F34',
-              fontSize: 16,
-              alignSelf: 'center',
-              marginTop: 13,
-            }}
-            onPress={() => {
-              navigation.navigate('SignInScreen');
-            }}
-          >
-            Cancel Registration
-          </Text>
-        </View>
-        <Image style={styles.curve} source={require('./images/curves.png')} />
-      </ImageBackground>
+      {showFinish ? (
+        <ImageBackground
+          source={require('./images/background.jpg')}
+          resizeMode="cover"
+          style={styles.image}
+        >
+          <Image style={styles.logo} source={require('./images/logo.png')} />
+          <View style={{ marginBottom: 100 }}>
+            <Button
+              color="#ffffff"
+              onPress={onSubmit}
+              style={{
+                width: 260,
+                height: 50,
+                backgroundColor: '#0F0F34',
+                alignSelf: 'center',
+                borderRadius: 30,
+                paddingTop: 6,
+              }}
+            >
+              Finish
+            </Button>
+            <Text
+              style={{
+                color: '#0F0F34',
+                fontSize: 16,
+                alignSelf: 'center',
+                marginTop: 13,
+              }}
+              onPress={() => {
+                navigation.navigate('SignInScreen');
+              }}
+            >
+              Cancel Registration
+            </Text>
+          </View>
+          <Image style={styles.curve} source={require('./images/curves.png')} />
+        </ImageBackground>
+      ) : (
+        <ImageBackground
+          source={require('./images/background.jpg')}
+          resizeMode="cover"
+          style={styles.image}
+        >
+          <Image style={styles.logo} source={require('./images/logo.png')} />
+          <View style={{ marginBottom: 100 }}>
+            <View style={styles.bottomSection}>
+              <Image
+                style={styles.pricessing}
+                source={require('./images/processing.gif')}
+              />
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: '#2E3361',
+                  alignSelf: 'center',
+                  marginTop: 14,
+                }}
+              >
+                Finishing your registration...
+              </Text>
+            </View>
+            <Text
+              style={{
+                color: '#0F0F34',
+                fontSize: 16,
+                alignSelf: 'center',
+                marginTop: 13,
+              }}
+              onPress={() => {
+                navigation.navigate('SignInScreen');
+              }}
+            >
+              Cancel Registration
+            </Text>
+          </View>
+          <Image style={styles.curve} source={require('./images/curves.png')} />
+        </ImageBackground>
+      )}
     </View>
   );
 }
@@ -127,6 +171,15 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
     marginBottom: -120,
+  },
+  bottomSection: {
+    paddingTop: 12,
+  },
+  pricessing: {
+    width: 30,
+    height: 30,
+    zIndex: 10,
+    alignSelf: 'center',
   },
 });
 

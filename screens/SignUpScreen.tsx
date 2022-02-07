@@ -115,7 +115,7 @@ const SignUpScreen = ({ route }) => {
               checked &&
               terms
             ) {
-              navigation.navigate('FaceRecognitionRegister', {
+              navigation.navigate('OTPScreen', {
                 firstName: firstName,
                 lastName: lastName,
                 idNumber: idNumber,
