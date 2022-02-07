@@ -14,6 +14,7 @@ import NotFoundScreen from '../screens/NotFoundScreen';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import FaceRecognitionRegister from '../screens/FaceRecognitionRegister';
+import OTPScreen from '../screens/OTPScreen';
 import FinishRegistration from '../screens/FinishRegistration';
 import FaceRecorgnitionLogin from '../screens/FaceRecognitionLogin';
 import FaceRecorgnition from '../screens/FaceRecognition';
@@ -61,6 +62,13 @@ function RootNavigator() {
         component={SignUpScreen}
         options={{ title: 'Sign Up' }}
       />
+
+      <Stack.Screen
+        name="OTPScreen"
+        component={OTPScreen}
+        options={{ title: 'OTP' }}
+      />
+
       <Stack.Screen
         name="FaceRecognitionRegister"
         component={FaceRecognitionRegister}
