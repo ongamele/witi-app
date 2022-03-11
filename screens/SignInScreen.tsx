@@ -33,7 +33,7 @@ function SignInScreen() {
             icon="login"
             color="#ffffff"
             onPress={() => {
-              navigation.navigate('FaceRecorgnitionLogin');
+              navigation.navigate('SignUpScreen', { message: '' });
             }}
             style={{
               width: 260,
@@ -44,7 +44,7 @@ function SignInScreen() {
               paddingTop: 6,
             }}
           >
-            Sign In
+            Verify
           </Button>
           <Text
             style={{
@@ -53,11 +53,8 @@ function SignInScreen() {
               alignSelf: 'center',
               marginTop: 13,
             }}
-            onPress={() => {
-              navigation.navigate('SignUpScreen', { message: '' });
-            }}
           >
-            New here? Sign up
+            Identity Verification
           </Text>
         </View>
         <Image style={styles.curve} source={require('./images/curves.png')} />

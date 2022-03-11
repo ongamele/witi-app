@@ -5,7 +5,7 @@ import * as FaceDetector from 'expo-face-detector';
 import { Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
-export default function FaceRecognitionRegister({ route }) {
+export default function IdRecognition({ route }) {
   const cam = useRef<Camera | null>();
   const navigation = useNavigation();
 
@@ -32,6 +32,8 @@ export default function FaceRecognitionRegister({ route }) {
   const lastName = route.params.Surname;
   const phoneNumber = route.params.Phone;
   const idNumber = route.params.IdNumber;
+  const faceFormData = route.params.faceFormData;
+  const faceFileName = route.params.faceFileName;
 
   const onSubmit = async () => {
     if (cam.current) {
@@ -39,12 +41,12 @@ export default function FaceRecognitionRegister({ route }) {
       let photo = await cam.current.takePictureAsync(options);
       const source = photo.uri;
       //console.log(source);
-      const fileName = source.replace(/^.*[\\\/]/, '');
+      const idFileName = source.replace(/^.*[\\\/]/, '');
       const ext = source.substring(source.lastIndexOf('.') + 1);
-      var faceFormData = new FormData();
-      faceFormData.append('file', {
+      var idFormData = new FormData();
+      idFormData.append('file', {
         uri: source,
-        name: fileName,
+        name: idFileName,
         type: `image/${ext}`,
       });
 
@@ -62,17 +64,20 @@ export default function FaceRecognitionRegister({ route }) {
 
       //return { ...photo, imageData: data };
 
-      navigation.navigate('IdRecognition', {
+      navigation.navigate('FinishRegistration', {
         Name: firstName,
         Surname: lastName,
         IdNumber: idNumber,
         Phone: phoneNumber,
-        fileName: fileName,
         faceFormData: faceFormData,
-        faceFileName: fileName,
+        idFormData: idFormData,
+        faceFileName: faceFileName,
+        idFileName: idFileName,
       });
     }
   };
+
+  const type = Camera.Constants.Type.back;
 
   return (
     <View style={{ flex: 1 }}>
@@ -83,14 +88,14 @@ export default function FaceRecognitionRegister({ route }) {
       >
         <Camera
           style={styles.camera}
-          type="front"
+          type={type}
           ref={cam}
           onFacesDetected={faceDetected}
           faceDetectorSettings={{
             mode: FaceDetector.FaceDetectorMode.fast,
             detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
             runClassifications: FaceDetector.FaceDetectorClassifications.all,
-            minDetectionInterval: 125,
+            minDetectionInterval: 300,
             tracking: true,
           }}
         >
@@ -111,7 +116,7 @@ export default function FaceRecognitionRegister({ route }) {
               marginTop: 40,
             }}
           >
-            FIT YOUR FACE IN THE FRAME
+            Take a full picture of your ID.
           </Text>
           <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
             <Button

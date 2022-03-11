@@ -28,7 +28,7 @@ const UserDetails = ({ route }) => {
   const [lastName, setLastName] = useState(route.params.Surname);
   const [phoneNumber, setPhoneNo] = useState(route.params.Phone);
   const [idNumber, setIdNumber] = useState(route.params.IdNumber);
-  const [faceImage, setFaceImage] = useState(route.params.faceImage);
+  const [faceImage, setFaceImage] = useState(route.params.faceFileName);
 
   async function onSubmit() {
     setVisible(true);
@@ -58,6 +58,17 @@ const UserDetails = ({ route }) => {
             uri: `https://vlxkgewzbkitgpipqpst.supabase.in/storage/v1/object/public/witi-bucket/users/${faceImage}`,
           }}
         />
+        <Text
+          style={{
+            alignSelf: 'center',
+            color: 'green',
+            fontSize: 14,
+            fontWeight: 'bold',
+            margin: 8,
+          }}
+        >
+          Verification Was Successful!
+        </Text>
         <Text style={styles.formText}>FIRST NAME</Text>
         <TextInput
           style={styles.formInput}

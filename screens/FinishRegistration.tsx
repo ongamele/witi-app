@@ -15,7 +15,8 @@ import { CREATE_USER } from '../Graphql/Mutation';
 import { supabase } from '../supabase-service';
 
 function FinishRegistration({ route }) {
-  const [createUser, { data, error, loading }] = useMutation(CREATE_USER);
+  const [createUser, { data: verifiedData, error, loading }] =
+    useMutation(CREATE_USER);
   const [showFinish, setShowFinish] = React.useState(true);
   const navigation = useNavigation();
 
@@ -23,40 +24,62 @@ function FinishRegistration({ route }) {
   const lastName = route.params.Surname;
   const phoneNumber = route.params.Phone;
   const idNumber = route.params.IdNumber;
-  const fileName = route.params.fileName;
-  const formData = route.params.formData;
-  //console.log(formData);
+  const faceFileName = route.params.faceFileName;
+  const faceFormData = route.params.faceFormData;
+  const idFormData = route.params.idFormData;
+  const idFileName = route.params.idFileName;
 
   const onSubmit = async () => {
     setShowFinish(false);
     const { data, error } = await supabase.storage
       .from('witi-bucket/users')
-      .upload(fileName, formData);
+      .upload(faceFileName, faceFormData);
     if (error) {
       console.log(error);
     } else {
       // console.log(data);
     }
+
+    await supabase.storage
+      .from('witi-bucket/ids')
+      .upload(idFileName, idFormData);
+
     createUser({
       variables: {
         firstName: firstName,
         lastName: lastName,
         idNumber: idNumber,
         phoneNumber: phoneNumber,
-        faceImage: fileName,
+        faceFileName: faceFileName,
+        idFileName: idFileName,
       },
     });
 
-    //return { ...photo, imageData: data };
+    if (
+      !firstName ||
+      !lastName ||
+      !idNumber ||
+      !phoneNumber ||
+      !faceFileName ||
+      !idFileName
+    ) {
+      alert('SOME DATA IS MISSING');
+    }
 
-    navigation.navigate('UserDetails', {
-      Name: firstName,
-      Surname: lastName,
-      IdNumber: idNumber,
-      Phone: phoneNumber,
-      faceImage: fileName,
-    });
+    //return { ...photo, imageData: data };
   };
+
+  {
+    verifiedData
+      ? navigation.navigate('UserDetails', {
+          Name: firstName,
+          Surname: lastName,
+          IdNumber: idNumber,
+          Phone: phoneNumber,
+          faceFileName: faceFileName,
+        })
+      : loading;
+  }
 
   return (
     <View style={styles.container}>

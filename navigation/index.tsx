@@ -17,6 +17,7 @@ import FaceRecognitionRegister from '../screens/FaceRecognitionRegister';
 import OTPScreen from '../screens/OTPScreen';
 import FinishRegistration from '../screens/FinishRegistration';
 import FaceRecorgnitionLogin from '../screens/FaceRecognitionLogin';
+import IdRecognition from '../screens/IdRecognition';
 import FaceRecorgnition from '../screens/FaceRecognition';
 import UserDetails from '../screens/UserDetails';
 import { RootStackParamList } from '../types';
@@ -73,6 +74,12 @@ function RootNavigator() {
         name="FaceRecognitionRegister"
         component={FaceRecognitionRegister}
         options={{ title: 'Register' }}
+      />
+
+      <Stack.Screen
+        name="IdRecognition"
+        component={IdRecognition}
+        options={{ title: 'ID Photo' }}
       />
 
       <Stack.Screen

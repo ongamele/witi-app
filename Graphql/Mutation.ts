@@ -6,7 +6,8 @@ export const CREATE_USER = gql`
     $lastName: String!
     $idNumber: String!
     $phoneNumber: String!
-    $faceImage: String!
+    $faceFileName: String!
+    $idFileName: String!
   ) {
     createUser(
       registerInput: {
@@ -14,14 +15,16 @@ export const CREATE_USER = gql`
         lastName: $lastName
         idNumber: $idNumber
         phoneNumber: $phoneNumber
-        faceImage: $faceImage
+        faceFileName: $faceFileName
+        idFileName: $idFileName
       }
     ) {
       firstName
       lastName
       idNumber
       phoneNumber
-      faceImage
+      faceFileName
+      idFileName
     }
   }
 `;
